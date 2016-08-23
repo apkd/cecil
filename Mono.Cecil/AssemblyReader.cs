@@ -2274,10 +2274,6 @@ namespace Mono.Cecil {
 			}
 
 			member.token = new MetadataToken (TokenType.MemberRef, rid);
-
-			if (module.IsWindowsMetadata ())
-				WindowsRuntimeProjections.Project (member);
-
 			return member;
 		}
 

@@ -47,11 +47,6 @@ namespace Mono.Cecil {
 			get { return projection != null; }
 		}
 
-		internal MemberReferenceProjection WindowsRuntimeProjection {
-			get { return (MemberReferenceProjection) projection; }
-			set { projection = value; }
-		}
-
 		internal bool HasImage {
 			get {
 				var module = Module;
