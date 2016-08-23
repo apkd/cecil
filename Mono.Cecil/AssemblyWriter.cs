@@ -1079,6 +1079,8 @@ namespace Mono.Cecil {
 
 		void AttachTypeDefToken (TypeDefinition type)
 		{
+			var treatment = WindowsRuntimeProjections.RemoveProjection(type);
+
 			type.token = new MetadataToken (TokenType.TypeDef, type_rid++);
 			type.fields_range.Start = field_rid;
 			type.methods_range.Start = method_rid;
@@ -1091,6 +1093,8 @@ namespace Mono.Cecil {
 
 			if (type.HasNestedTypes)
 				AttachNestedTypesDefToken (type);
+
+			WindowsRuntimeProjections.ApplyProjection(type, treatment);
 		}
 
 		void AttachNestedTypesDefToken (TypeDefinition type)
@@ -1773,15 +1777,11 @@ namespace Mono.Cecil {
 
 		MetadataToken GetMemberRefToken (MemberReference member)
 		{
-			var projection = WindowsRuntimeProjections.RemoveProjection (member);
-
 			var row = CreateMemberRefRow (member);
 
 			MetadataToken token;
 			if (!member_ref_map.TryGetValue (row, out token))
 				token = AddMemberReference (member, row);
-
-			WindowsRuntimeProjections.ApplyProjection (member, projection);
 
 			return token;
 		}
