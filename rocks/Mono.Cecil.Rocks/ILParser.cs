@@ -158,7 +158,7 @@ namespace Mono.Cecil.Rocks {
 					visitor.OnInlineSignature (opcode, code.GetCallSite (code.ReadToken ()));
 					break;
 				case OperandType.InlineString:
-					visitor.OnInlineString (opcode, code.GetString (code.ReadToken ()));
+					visitor.OnInlineString (opcode, code.GetString (code.ReadToken ()).Value);
 					break;
 				case OperandType.ShortInlineArg:
 					visitor.OnInlineArgument (opcode, code.GetParameter (code.ReadByte ()));
