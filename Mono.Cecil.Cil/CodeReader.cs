@@ -189,7 +189,9 @@ namespace Mono.Cecil.Cil {
 			case OperandType.InlineSig:
 				return GetCallSite (ReadToken ());
 			case OperandType.InlineString:
-				return GetString (ReadToken ());
+				var token = ReadToken ();
+				body.instructionTokens.Add (instruction, token);
+				return GetString (token);
 			case OperandType.InlineTok:
 			case OperandType.InlineType:
 			case OperandType.InlineMethod:
