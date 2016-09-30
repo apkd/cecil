@@ -17,23 +17,6 @@ using RVA = System.UInt32;
 
 namespace Mono.Cecil.Cil {
 
-	public class InlineString
-	{
-		public InlineString (string value, MetadataToken token)
-		{
-			this.Value = value;
-			this.Token = token;
-		}
-
-		public string Value { get; }
-		public MetadataToken Token { get; }
-
-		public override string ToString ()
-		{
-			return Value;
-		}
-	}
-
 	sealed class CodeReader : ByteBuffer {
 
 		readonly internal MetadataReader reader;
@@ -217,9 +200,9 @@ namespace Mono.Cecil.Cil {
 			}
 		}
 
-		public InlineString GetString (MetadataToken token)
+		public string GetString (MetadataToken token)
 		{
-			return new InlineString(reader.image.UserStringHeap.Read (token.RID), token);
+			return reader.image.UserStringHeap.Read (token.RID);
 		}
 
 		public ParameterDefinition GetParameter (int index)
@@ -497,7 +480,7 @@ namespace Mono.Cecil.Cil {
 					buffer.WriteUInt32 (
 						new MetadataToken (
 							TokenType.String,
-							metadata.user_string_heap.GetStringIndex (@string.Value)).ToUInt32 ());
+							metadata.user_string_heap.GetStringIndex (@string)).ToUInt32 ());
 					break;
 				case OperandType.InlineSig:
 					var call_site = GetCallSite (new MetadataToken (buffer.ReadUInt32 ()));
