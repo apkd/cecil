@@ -79,7 +79,7 @@ namespace Mono.Cecil.Cil {
 			get { return scope; }
 			set { scope = value; }
 		}
-		
+
 		public ParameterDefinition ThisParameter {
 			get {
 				if (method == null || method.DeclaringType == null)
@@ -118,14 +118,7 @@ namespace Mono.Cecil.Cil {
 
 		public bool GetInstructionToken (Instruction instruction, out MetadataToken token)
 		{
-			if (!instructionTokens.ContainsKey (instruction))
-			{
-				token = new MetadataToken(0u);
-				return false;
-			}
-
-			token = instructionTokens [instruction];
-			return true;
+			return instructionTokens.TryGetValue (instruction, out token);
 		}
 	}
 
