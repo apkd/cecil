@@ -187,7 +187,7 @@ namespace Mono.Cecil.Tests {
 				Assert.AreEqual("Windows.Foundation.Collections.IMap`2<System.String,System.Object>", customPropertySetClass.Interfaces[5].InterfaceType.FullName);
 
 				Assert.AreEqual(0, customPropertySetClass.Interfaces[6].CustomAttributes.Count);
-				Assert.AreEqual("Windows.Foundation.Collections.IIterable`1<Windows.Foundation.Collections.IKeyValuePair`2<System.String,System.Object>>", customPropertySetClass.Interfaces[6].InterfaceType.FullName);
+				Assert.AreEqual("Windows.Foundation.Collections.IIterable`1<System.Collections.Generic.KeyValuePair`2<System.String,System.Object>>", customPropertySetClass.Interfaces[6].InterfaceType.FullName);
 
 			}, verify: false, assemblyResolver: WindowsRuntimeAssemblyResolver.CreateInstance(), applyWindowsRuntimeProjections: true);
 		}

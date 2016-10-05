@@ -299,7 +299,23 @@ namespace Mono.Cecil {
 			foreach (var implementedInterface in type.Interfaces) {
 				var interfaceType = implementedInterface.InterfaceType;
 				if (IsRedirectedType (implementedInterface.InterfaceType)) {
-					var unprojectedType = UnprojectIfNeeded (interfaceType);
+					var etype = interfaceType.GetElementType ();
+					var unprojectedType = new TypeReference (etype.Namespace, etype.Name, etype.Module, etype.Scope) {
+						DeclaringType = etype.DeclaringType,
+						projection = etype.projection
+					};
+
+					RemoveProjection (unprojectedType);
+
+					var genericInstanceType = interfaceType as GenericInstanceType;
+					if (genericInstanceType != null) {
+						var genericUnprojectedType = new GenericInstanceType (unprojectedType);
+						foreach (var genericArgument in genericInstanceType.GenericArguments)
+							genericUnprojectedType.GenericArguments.Add (genericArgument);
+
+						unprojectedType = genericUnprojectedType;
+					}
+
 					var unprojectedInterface = new InterfaceImplementation (unprojectedType);
 					redirectedInterfaces.Add (new KeyValuePair<InterfaceImplementation, InterfaceImplementation> (implementedInterface, unprojectedInterface));
 				}
@@ -313,31 +329,6 @@ namespace Mono.Cecil {
 			}
 
 			return TypeDefinitionTreatment.RedirectImplementedMethods;
-		}
-
-		private static TypeReference UnprojectIfNeeded (TypeReference type)
-		{
-			if (!IsRedirectedType (type))
-				return type;
-
-			var etype = type.GetElementType ();
-			var unprojected_type = new TypeReference (etype.Namespace, etype.Name, etype.Module, etype.Scope) {
-				DeclaringType = etype.DeclaringType,
-				projection = etype.projection,
-			};
-
-			RemoveProjection(unprojected_type);
-
-			var generic_type = type as GenericInstanceType;
-			if (generic_type != null) {
-				var unprojected_generic_type = new GenericInstanceType (unprojected_type);
-				foreach (var generic_argument in generic_type.GenericArguments)
-					unprojected_generic_type.GenericArguments.Add (UnprojectIfNeeded (generic_argument));
-
-				unprojected_type = unprojected_generic_type;
-			}
-
-			return unprojected_type;
 		}
 
 		private static void CollectImplementedInterfaces (TypeReference type, HashSet<TypeReference> results)
