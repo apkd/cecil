@@ -9,6 +9,7 @@
 //
 
 using System;
+using System.Collections.Generic;
 using System.Threading;
 
 using Mono.Collections.Generic;
@@ -29,6 +30,7 @@ namespace Mono.Cecil.Cil {
 		internal Collection<ExceptionHandler> exceptions;
 		internal Collection<VariableDefinition> variables;
 		Scope scope;
+		internal Dictionary<Instruction, MetadataToken> instructionTokens;
 
 		public MethodDefinition Method {
 			get { return method; }
@@ -106,11 +108,17 @@ namespace Mono.Cecil.Cil {
 		public MethodBody (MethodDefinition method)
 		{
 			this.method = method;
+			instructionTokens = new Dictionary<Instruction, MetadataToken> ();
 		}
 
 		public ILProcessor GetILProcessor ()
 		{
 			return new ILProcessor (this);
+		}
+
+		public bool GetInstructionToken (Instruction instruction, out MetadataToken token)
+		{
+			return instructionTokens.TryGetValue (instruction, out token);
 		}
 	}
 
