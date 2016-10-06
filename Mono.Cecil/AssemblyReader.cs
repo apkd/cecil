@@ -191,7 +191,7 @@ namespace Mono.Cecil {
 			ReadGenericParameters (type);
 
 			if (type.HasInterfaces)
-				Read (type.Interfaces);
+				ReadInterfaces (type);
 
 			if (type.HasNestedTypes)
 				ReadTypes (type.NestedTypes);
@@ -263,6 +263,14 @@ namespace Mono.Cecil {
 				var custom_attribute = custom_attributes [i];
 
 				Read (custom_attribute.ConstructorArguments);
+			}
+		}
+
+		private void ReadInterfaces (TypeDefinition type)
+		{
+			var interfaces = type.Interfaces;
+			for (int i = 0; i < interfaces.Count; i++) {
+				ReadCustomAttributes (interfaces[i]);
 			}
 		}
 
