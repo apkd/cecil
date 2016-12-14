@@ -15,18 +15,6 @@ using Mono.Collections.Generic;
 
 namespace Mono.Cecil {
 
-	sealed class MemberReferenceProjection {
-
-		public readonly string Name;
-		public readonly MemberReferenceTreatment Treatment;
-
-		public MemberReferenceProjection (MemberReference member, MemberReferenceTreatment treatment)
-		{
-			Name = member.Name;
-			Treatment = treatment;
-		}
-	}
-
 	sealed class TypeDefinitionProjection {
 		public readonly TypeAttributes Attributes;
 		public readonly string Name;
@@ -749,8 +737,6 @@ namespace Mono.Cecil {
 			return projection;
 		}
 
-		#endregion
-
 		#region MemberReference
 
 		static bool ImplementsRedirectedInterface (MemberReference member)
@@ -981,5 +967,7 @@ namespace Mono.Cecil {
 
 			return projection;
 		}
+
+		#endregion
 	}
 }

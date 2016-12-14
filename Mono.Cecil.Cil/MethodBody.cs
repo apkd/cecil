@@ -29,7 +29,7 @@ namespace Mono.Cecil.Cil {
 		internal Collection<Instruction> instructions;
 		internal Collection<ExceptionHandler> exceptions;
 		internal Collection<VariableDefinition> variables;
-		Scope scope;
+		ScopeDebugInformation scope;
 		internal Dictionary<Instruction, MetadataToken> instructionTokens;
 
 		public MethodDefinition Method {
@@ -73,6 +73,11 @@ namespace Mono.Cecil.Cil {
 
 		public Collection<VariableDefinition> Variables {
 			get { return variables ?? (variables = new VariableDefinitionCollection ()); }
+		}
+
+		public ScopeDebugInformation Scope {
+			get { return scope; }
+			set { scope = value; }
 		}
 
 		public ParameterDefinition ThisParameter {
