@@ -38,7 +38,8 @@ namespace Mono.Cecil {
 			get { return (TypeAttributes) attributes; }
 			set {
 				if (IsWindowsRuntimeProjection && (ushort) value != attributes)
-					throw new InvalidOperationException ("Projected type definition attributes can't be changed.");
+					throw new InvalidOperationException ();
+
 				attributes = (uint) value;
 			}
 		}
@@ -52,7 +53,8 @@ namespace Mono.Cecil {
 			get { return base.Name; }
 			set {
 				if (IsWindowsRuntimeProjection && value != base.Name)
-					throw new InvalidOperationException ("Projected type definition name can't be changed.");
+					throw new InvalidOperationException ();
+
 				base.Name = value;
 			}
 		}
@@ -479,7 +481,7 @@ namespace Mono.Cecil {
 		}
 	}
 
-	public class InterfaceImplementation : ICustomAttributeProvider
+	public sealed class InterfaceImplementation : ICustomAttributeProvider
 	{
 		internal TypeDefinition type;
 		internal MetadataToken token;
@@ -497,12 +499,20 @@ namespace Mono.Cecil {
 				if (custom_attributes != null)
 					return custom_attributes.Count > 0;
 
+				if (type == null)
+					return false;
+
 				return this.GetHasCustomAttributes (type.Module);
 			}
 		}
 
 		public Collection<CustomAttribute> CustomAttributes {
-			get { return custom_attributes ?? (this.GetCustomAttributes (ref custom_attributes, type.Module)); }
+			get {
+				if (type == null)
+					return custom_attributes = new Collection<CustomAttribute> ();
+
+				return custom_attributes ?? (this.GetCustomAttributes (ref custom_attributes, type.Module));
+			}
 		}
 
 		public MetadataToken MetadataToken {

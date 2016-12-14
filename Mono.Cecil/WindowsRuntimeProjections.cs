@@ -15,8 +15,19 @@ using Mono.Collections.Generic;
 
 namespace Mono.Cecil {
 
-	class TypeDefinitionProjection {
+	sealed class MemberReferenceProjection {
 
+		public readonly string Name;
+		public readonly MemberReferenceTreatment Treatment;
+
+		public MemberReferenceProjection (MemberReference member, MemberReferenceTreatment treatment)
+		{
+			Name = member.Name;
+			Treatment = treatment;
+		}
+	}
+
+	sealed class TypeDefinitionProjection {
 		public readonly TypeAttributes Attributes;
 		public readonly string Name;
 		public readonly TypeDefinitionTreatment Treatment;
@@ -33,7 +44,7 @@ namespace Mono.Cecil {
 		}
 	}
 
-	class TypeReferenceProjection {
+	sealed class TypeReferenceProjection {
 
 		public readonly string Name;
 		public readonly string Namespace;
@@ -49,7 +60,7 @@ namespace Mono.Cecil {
 		}
 	}
 
-	class MethodDefinitionProjection {
+	sealed class MethodDefinitionProjection {
 
 		public readonly MethodAttributes Attributes;
 		public readonly MethodImplAttributes ImplAttributes;
@@ -65,7 +76,7 @@ namespace Mono.Cecil {
 		}
 	}
 
-	class FieldDefinitionProjection {
+	sealed class FieldDefinitionProjection {
 
 		public readonly FieldAttributes Attributes;
 		public readonly FieldDefinitionTreatment Treatment;
@@ -77,7 +88,7 @@ namespace Mono.Cecil {
 		}
 	}
 
-	class CustomAttributeValueProjection {
+	sealed class CustomAttributeValueProjection {
 
 		public readonly AttributeTargets Targets;
 		public readonly CustomAttributeValueTreatment Treatment;
@@ -89,7 +100,7 @@ namespace Mono.Cecil {
 		}
 	}
 
-	class WindowsRuntimeProjections {
+	sealed class WindowsRuntimeProjections {
 
 		struct ProjectionInfo {
 
@@ -133,62 +144,61 @@ namespace Mono.Cecil {
 		static Dictionary<string, ProjectionInfo> Projections
 		{
 			get {
-				if (projections == null) {
-					projections = new Dictionary<string, ProjectionInfo> {
-						{ "AttributeTargets", new ProjectionInfo ("Windows.Foundation.Metadata", "System", "AttributeTargets", "System.Runtime") },
-						{ "AttributeUsageAttribute", new ProjectionInfo ("Windows.Foundation.Metadata", "System", "AttributeUsageAttribute", "System.Runtime", attribute: true) },
-						{ "Color", new ProjectionInfo ("Windows.UI", "Windows.UI", "Color", "System.Runtime.WindowsRuntime") },
-						{ "CornerRadius", new ProjectionInfo ("Windows.UI.Xaml", "Windows.UI.Xaml", "CornerRadius", "System.Runtime.WindowsRuntime.UI.Xaml") },
-						{ "DateTime", new ProjectionInfo ("Windows.Foundation", "System", "DateTimeOffset", "System.Runtime") },
-						{ "Duration", new ProjectionInfo ("Windows.UI.Xaml", "Windows.UI.Xaml", "Duration", "System.Runtime.WindowsRuntime.UI.Xaml") },
-						{ "DurationType", new ProjectionInfo ("Windows.UI.Xaml", "Windows.UI.Xaml", "DurationType", "System.Runtime.WindowsRuntime.UI.Xaml") },
-						{ "EventHandler`1", new ProjectionInfo ("Windows.Foundation", "System", "EventHandler`1", "System.Runtime") },
-						{ "EventRegistrationToken", new ProjectionInfo ("Windows.Foundation", "System.Runtime.InteropServices.WindowsRuntime", "EventRegistrationToken", "System.Runtime.InteropServices.WindowsRuntime") },
-						{ "GeneratorPosition", new ProjectionInfo ("Windows.UI.Xaml.Controls.Primitives", "Windows.UI.Xaml.Controls.Primitives", "GeneratorPosition", "System.Runtime.WindowsRuntime.UI.Xaml") },
-						{ "GridLength", new ProjectionInfo ("Windows.UI.Xaml", "Windows.UI.Xaml", "GridLength", "System.Runtime.WindowsRuntime.UI.Xaml") },
-						{ "GridUnitType", new ProjectionInfo ("Windows.UI.Xaml", "Windows.UI.Xaml", "GridUnitType", "System.Runtime.WindowsRuntime.UI.Xaml") },
-						{ "HResult", new ProjectionInfo ("Windows.Foundation", "System", "Exception", "System.Runtime") },
-						{ "IBindableIterable", new ProjectionInfo ("Windows.UI.Xaml.Interop", "System.Collections", "IEnumerable", "System.Runtime") },
-						{ "IBindableVector", new ProjectionInfo ("Windows.UI.Xaml.Interop", "System.Collections", "IList", "System.Runtime") },
-						{ "IClosable", new ProjectionInfo ("Windows.Foundation", "System", "IDisposable", "System.Runtime") },
-						{ "ICommand", new ProjectionInfo ("Windows.UI.Xaml.Input", "System.Windows.Input", "ICommand", "System.ObjectModel") },
-						{ "IIterable`1", new ProjectionInfo ("Windows.Foundation.Collections", "System.Collections.Generic", "IEnumerable`1", "System.Runtime") },
-						{ "IKeyValuePair`2", new ProjectionInfo ("Windows.Foundation.Collections", "System.Collections.Generic", "KeyValuePair`2", "System.Runtime") },
-						{ "IMapView`2", new ProjectionInfo ("Windows.Foundation.Collections", "System.Collections.Generic", "IReadOnlyDictionary`2", "System.Runtime") },
-						{ "IMap`2", new ProjectionInfo ("Windows.Foundation.Collections", "System.Collections.Generic", "IDictionary`2", "System.Runtime") },
-						{ "INotifyCollectionChanged", new ProjectionInfo ("Windows.UI.Xaml.Interop", "System.Collections.Specialized", "INotifyCollectionChanged", "System.ObjectModel") },
-						{ "INotifyPropertyChanged", new ProjectionInfo ("Windows.UI.Xaml.Data", "System.ComponentModel", "INotifyPropertyChanged", "System.ObjectModel") },
-						{ "IReference`1", new ProjectionInfo ("Windows.Foundation", "System", "Nullable`1", "System.Runtime") },
-						{ "IVectorView`1", new ProjectionInfo ("Windows.Foundation.Collections", "System.Collections.Generic", "IReadOnlyList`1", "System.Runtime") },
-						{ "IVector`1", new ProjectionInfo ("Windows.Foundation.Collections", "System.Collections.Generic", "IList`1", "System.Runtime") },
-						{ "KeyTime", new ProjectionInfo ("Windows.UI.Xaml.Media.Animation", "Windows.UI.Xaml.Media.Animation", "KeyTime", "System.Runtime.WindowsRuntime.UI.Xaml") },
-						{ "Matrix", new ProjectionInfo ("Windows.UI.Xaml.Media", "Windows.UI.Xaml.Media", "Matrix", "System.Runtime.WindowsRuntime.UI.Xaml") },
-						{ "Matrix3D", new ProjectionInfo ("Windows.UI.Xaml.Media.Media3D", "Windows.UI.Xaml.Media.Media3D", "Matrix3D", "System.Runtime.WindowsRuntime.UI.Xaml") },
-						{ "Matrix3x2", new ProjectionInfo ("Windows.Foundation.Numerics", "System.Numerics", "Matrix3x2", "System.Numerics.Vectors") },
-						{ "Matrix4x4", new ProjectionInfo ("Windows.Foundation.Numerics", "System.Numerics", "Matrix4x4", "System.Numerics.Vectors") },
-						{ "NotifyCollectionChangedAction", new ProjectionInfo ("Windows.UI.Xaml.Interop", "System.Collections.Specialized", "NotifyCollectionChangedAction", "System.ObjectModel") },
-						{ "NotifyCollectionChangedEventArgs", new ProjectionInfo ("Windows.UI.Xaml.Interop", "System.Collections.Specialized", "NotifyCollectionChangedEventArgs", "System.ObjectModel") },
-						{ "NotifyCollectionChangedEventHandler", new ProjectionInfo ("Windows.UI.Xaml.Interop", "System.Collections.Specialized", "NotifyCollectionChangedEventHandler", "System.ObjectModel") },
-						{ "Plane", new ProjectionInfo ("Windows.Foundation.Numerics", "System.Numerics", "Plane", "System.Numerics.Vectors") },
-						{ "Point", new ProjectionInfo ("Windows.Foundation", "Windows.Foundation", "Point", "System.Runtime.WindowsRuntime") },
-						{ "PropertyChangedEventArgs", new ProjectionInfo ("Windows.UI.Xaml.Data", "System.ComponentModel", "PropertyChangedEventArgs", "System.ObjectModel") },
-						{ "PropertyChangedEventHandler", new ProjectionInfo ("Windows.UI.Xaml.Data", "System.ComponentModel", "PropertyChangedEventHandler", "System.ObjectModel") },
-						{ "Quaternion", new ProjectionInfo ("Windows.Foundation.Numerics", "System.Numerics", "Quaternion", "System.Numerics.Vectors") },
-						{ "Rect", new ProjectionInfo ("Windows.Foundation", "Windows.Foundation", "Rect", "System.Runtime.WindowsRuntime") },
-						{ "RepeatBehavior", new ProjectionInfo ("Windows.UI.Xaml.Media.Animation", "Windows.UI.Xaml.Media.Animation", "RepeatBehavior", "System.Runtime.WindowsRuntime.UI.Xaml") },
-						{ "RepeatBehaviorType", new ProjectionInfo ("Windows.UI.Xaml.Media.Animation", "Windows.UI.Xaml.Media.Animation", "RepeatBehaviorType", "System.Runtime.WindowsRuntime.UI.Xaml") },
-						{ "Size", new ProjectionInfo ("Windows.Foundation", "Windows.Foundation", "Size", "System.Runtime.WindowsRuntime") },
-						{ "Thickness", new ProjectionInfo ("Windows.UI.Xaml", "Windows.UI.Xaml", "Thickness", "System.Runtime.WindowsRuntime.UI.Xaml") },
-						{ "TimeSpan", new ProjectionInfo ("Windows.Foundation", "System", "TimeSpan", "System.Runtime") },
-						{ "TypeName", new ProjectionInfo ("Windows.UI.Xaml.Interop", "System", "Type", "System.Runtime") },
-						{ "Uri", new ProjectionInfo ("Windows.Foundation", "System", "Uri", "System.Runtime") },
-						{ "Vector2", new ProjectionInfo ("Windows.Foundation.Numerics", "System.Numerics", "Vector2", "System.Numerics.Vectors") },
-						{ "Vector3", new ProjectionInfo ("Windows.Foundation.Numerics", "System.Numerics", "Vector3", "System.Numerics.Vectors") },
-						{ "Vector4", new ProjectionInfo ("Windows.Foundation.Numerics", "System.Numerics", "Vector4", "System.Numerics.Vectors") },
-					};
-				}
+				if (projections != null)
+					return projections;
 
-				return projections;
+				return projections = new Dictionary<string, ProjectionInfo> {
+					{ "AttributeTargets", new ProjectionInfo ("Windows.Foundation.Metadata", "System", "AttributeTargets", "System.Runtime") },
+					{ "AttributeUsageAttribute", new ProjectionInfo ("Windows.Foundation.Metadata", "System", "AttributeUsageAttribute", "System.Runtime", attribute: true) },
+					{ "Color", new ProjectionInfo ("Windows.UI", "Windows.UI", "Color", "System.Runtime.WindowsRuntime") },
+					{ "CornerRadius", new ProjectionInfo ("Windows.UI.Xaml", "Windows.UI.Xaml", "CornerRadius", "System.Runtime.WindowsRuntime.UI.Xaml") },
+					{ "DateTime", new ProjectionInfo ("Windows.Foundation", "System", "DateTimeOffset", "System.Runtime") },
+					{ "Duration", new ProjectionInfo ("Windows.UI.Xaml", "Windows.UI.Xaml", "Duration", "System.Runtime.WindowsRuntime.UI.Xaml") },
+					{ "DurationType", new ProjectionInfo ("Windows.UI.Xaml", "Windows.UI.Xaml", "DurationType", "System.Runtime.WindowsRuntime.UI.Xaml") },
+					{ "EventHandler`1", new ProjectionInfo ("Windows.Foundation", "System", "EventHandler`1", "System.Runtime") },
+					{ "EventRegistrationToken", new ProjectionInfo ("Windows.Foundation", "System.Runtime.InteropServices.WindowsRuntime", "EventRegistrationToken", "System.Runtime.InteropServices.WindowsRuntime") },
+					{ "GeneratorPosition", new ProjectionInfo ("Windows.UI.Xaml.Controls.Primitives", "Windows.UI.Xaml.Controls.Primitives", "GeneratorPosition", "System.Runtime.WindowsRuntime.UI.Xaml") },
+					{ "GridLength", new ProjectionInfo ("Windows.UI.Xaml", "Windows.UI.Xaml", "GridLength", "System.Runtime.WindowsRuntime.UI.Xaml") },
+					{ "GridUnitType", new ProjectionInfo ("Windows.UI.Xaml", "Windows.UI.Xaml", "GridUnitType", "System.Runtime.WindowsRuntime.UI.Xaml") },
+					{ "HResult", new ProjectionInfo ("Windows.Foundation", "System", "Exception", "System.Runtime") },
+					{ "IBindableIterable", new ProjectionInfo ("Windows.UI.Xaml.Interop", "System.Collections", "IEnumerable", "System.Runtime") },
+					{ "IBindableVector", new ProjectionInfo ("Windows.UI.Xaml.Interop", "System.Collections", "IList", "System.Runtime") },
+					{ "IClosable", new ProjectionInfo ("Windows.Foundation", "System", "IDisposable", "System.Runtime") },
+					{ "ICommand", new ProjectionInfo ("Windows.UI.Xaml.Input", "System.Windows.Input", "ICommand", "System.ObjectModel") },
+					{ "IIterable`1", new ProjectionInfo ("Windows.Foundation.Collections", "System.Collections.Generic", "IEnumerable`1", "System.Runtime") },
+					{ "IKeyValuePair`2", new ProjectionInfo ("Windows.Foundation.Collections", "System.Collections.Generic", "KeyValuePair`2", "System.Runtime") },
+					{ "IMapView`2", new ProjectionInfo ("Windows.Foundation.Collections", "System.Collections.Generic", "IReadOnlyDictionary`2", "System.Runtime") },
+					{ "IMap`2", new ProjectionInfo ("Windows.Foundation.Collections", "System.Collections.Generic", "IDictionary`2", "System.Runtime") },
+					{ "INotifyCollectionChanged", new ProjectionInfo ("Windows.UI.Xaml.Interop", "System.Collections.Specialized", "INotifyCollectionChanged", "System.ObjectModel") },
+					{ "INotifyPropertyChanged", new ProjectionInfo ("Windows.UI.Xaml.Data", "System.ComponentModel", "INotifyPropertyChanged", "System.ObjectModel") },
+					{ "IReference`1", new ProjectionInfo ("Windows.Foundation", "System", "Nullable`1", "System.Runtime") },
+					{ "IVectorView`1", new ProjectionInfo ("Windows.Foundation.Collections", "System.Collections.Generic", "IReadOnlyList`1", "System.Runtime") },
+					{ "IVector`1", new ProjectionInfo ("Windows.Foundation.Collections", "System.Collections.Generic", "IList`1", "System.Runtime") },
+					{ "KeyTime", new ProjectionInfo ("Windows.UI.Xaml.Media.Animation", "Windows.UI.Xaml.Media.Animation", "KeyTime", "System.Runtime.WindowsRuntime.UI.Xaml") },
+					{ "Matrix", new ProjectionInfo ("Windows.UI.Xaml.Media", "Windows.UI.Xaml.Media", "Matrix", "System.Runtime.WindowsRuntime.UI.Xaml") },
+					{ "Matrix3D", new ProjectionInfo ("Windows.UI.Xaml.Media.Media3D", "Windows.UI.Xaml.Media.Media3D", "Matrix3D", "System.Runtime.WindowsRuntime.UI.Xaml") },
+					{ "Matrix3x2", new ProjectionInfo ("Windows.Foundation.Numerics", "System.Numerics", "Matrix3x2", "System.Numerics.Vectors") },
+					{ "Matrix4x4", new ProjectionInfo ("Windows.Foundation.Numerics", "System.Numerics", "Matrix4x4", "System.Numerics.Vectors") },
+					{ "NotifyCollectionChangedAction", new ProjectionInfo ("Windows.UI.Xaml.Interop", "System.Collections.Specialized", "NotifyCollectionChangedAction", "System.ObjectModel") },
+					{ "NotifyCollectionChangedEventArgs", new ProjectionInfo ("Windows.UI.Xaml.Interop", "System.Collections.Specialized", "NotifyCollectionChangedEventArgs", "System.ObjectModel") },
+					{ "NotifyCollectionChangedEventHandler", new ProjectionInfo ("Windows.UI.Xaml.Interop", "System.Collections.Specialized", "NotifyCollectionChangedEventHandler", "System.ObjectModel") },
+					{ "Plane", new ProjectionInfo ("Windows.Foundation.Numerics", "System.Numerics", "Plane", "System.Numerics.Vectors") },
+					{ "Point", new ProjectionInfo ("Windows.Foundation", "Windows.Foundation", "Point", "System.Runtime.WindowsRuntime") },
+					{ "PropertyChangedEventArgs", new ProjectionInfo ("Windows.UI.Xaml.Data", "System.ComponentModel", "PropertyChangedEventArgs", "System.ObjectModel") },
+					{ "PropertyChangedEventHandler", new ProjectionInfo ("Windows.UI.Xaml.Data", "System.ComponentModel", "PropertyChangedEventHandler", "System.ObjectModel") },
+					{ "Quaternion", new ProjectionInfo ("Windows.Foundation.Numerics", "System.Numerics", "Quaternion", "System.Numerics.Vectors") },
+					{ "Rect", new ProjectionInfo ("Windows.Foundation", "Windows.Foundation", "Rect", "System.Runtime.WindowsRuntime") },
+					{ "RepeatBehavior", new ProjectionInfo ("Windows.UI.Xaml.Media.Animation", "Windows.UI.Xaml.Media.Animation", "RepeatBehavior", "System.Runtime.WindowsRuntime.UI.Xaml") },
+					{ "RepeatBehaviorType", new ProjectionInfo ("Windows.UI.Xaml.Media.Animation", "Windows.UI.Xaml.Media.Animation", "RepeatBehaviorType", "System.Runtime.WindowsRuntime.UI.Xaml") },
+					{ "Size", new ProjectionInfo ("Windows.Foundation", "Windows.Foundation", "Size", "System.Runtime.WindowsRuntime") },
+					{ "Thickness", new ProjectionInfo ("Windows.UI.Xaml", "Windows.UI.Xaml", "Thickness", "System.Runtime.WindowsRuntime.UI.Xaml") },
+					{ "TimeSpan", new ProjectionInfo ("Windows.Foundation", "System", "TimeSpan", "System.Runtime") },
+					{ "TypeName", new ProjectionInfo ("Windows.UI.Xaml.Interop", "System", "Type", "System.Runtime") },
+					{ "Uri", new ProjectionInfo ("Windows.Foundation", "System", "Uri", "System.Runtime") },
+					{ "Vector2", new ProjectionInfo ("Windows.Foundation.Numerics", "System.Numerics", "Vector2", "System.Numerics.Vectors") },
+					{ "Vector3", new ProjectionInfo ("Windows.Foundation.Numerics", "System.Numerics", "Vector3", "System.Numerics.Vectors") },
+					{ "Vector4", new ProjectionInfo ("Windows.Foundation.Numerics", "System.Numerics", "Vector4", "System.Numerics.Vectors") },
+				};
 			}
 		}
 
@@ -199,8 +209,8 @@ namespace Mono.Cecil {
 		AssemblyNameReference[] VirtualReferences {
 			get {
 				if (virtual_references == null) {
-					// force module to read its assembly references. that will in turn initialze virtual_references
-					var temp = module.AssemblyReferences;
+					// force module to read its assembly references. that will in turn initialize virtual_references
+					Mixin.Read (module.AssemblyReferences);
 				}
 
 				return virtual_references;
@@ -211,8 +221,6 @@ namespace Mono.Cecil {
 		{
 			this.module = module;
 		}
-
-		#region TypeDefinition
 
 		public static void Project (TypeDefinition type)
 		{
@@ -501,10 +509,6 @@ namespace Mono.Cecil {
 			return projection;
 		}
 
-		#endregion
-
-		#region TypeReference
-
 		public static void Project (TypeReference type)
 		{
 			TypeReferenceTreatment treatment;
@@ -582,10 +586,6 @@ namespace Mono.Cecil {
 
 			return projection;
 		}
-
-		#endregion
-
-		#region MethodDefinition
 
 		public static void Project (MethodDefinition method)
 		{
@@ -709,10 +709,6 @@ namespace Mono.Cecil {
 
 			return projection;
 		}
-
-		#endregion
-
-		#region FieldDefinition
 
 		public static void Project (FieldDefinition field)
 		{
@@ -878,10 +874,6 @@ namespace Mono.Cecil {
 			throw new Exception ();
 		}
 
-		#endregion
-
-		#region CustomAttribute
-
 		public static void Project (ICustomAttributeProvider owner, CustomAttribute attribute)
 		{
 			if (!IsWindowsAttributeUsageAttribute (owner, attribute))
@@ -989,7 +981,5 @@ namespace Mono.Cecil {
 
 			return projection;
 		}
-
-		#endregion
 	}
 }

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 using NUnit.Framework;
@@ -70,13 +71,15 @@ namespace N
         /// <summary>
         /// ID string generated is "E:N.X.d".
         /// </summary>
+#pragma warning disable 67
         public event D d;
+#pragma warning restore 67
 
 
-        /// <summary>
-        /// ID string generated is "P:N.X.Item(System.String)".
-        /// </summary>
-        public int this[string s] { get { return 1; } }
+		/// <summary>
+		/// ID string generated is "P:N.X.Item(System.String)".
+		/// </summary>
+		public int this[string s] { get { return 1; } }
 
 
         /// <summary>
@@ -95,6 +98,10 @@ namespace N
         /// ID string generated is "M:N.X.op_Explicit(N.X)~System.Int32".
         /// </summary>
         public static explicit operator int(X x) { return 1; }
+
+	    public static void Linq (IEnumerable<string> enumerable, Func<string> selector)
+	    {
+	    }
     }
 }
 
@@ -233,6 +240,15 @@ namespace Mono.Cecil.Tests {
 			var nestedType = type.NestedTypes.Single (t => t.Name == "Nested");
 
 			AssertDocumentID ("T:N.X.Nested", nestedType);
+		}
+
+		[Test]
+		public void Linq ()
+		{
+			var type = GetTestType ();
+			var method = type.GetMethod ("Linq");
+
+			AssertDocumentID ("M:N.X.Linq(System.Collections.Generic.IEnumerable{System.String},System.Func{System.String})", method);
 		}
 
 		TypeDefinition GetTestType ()

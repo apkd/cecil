@@ -16,7 +16,7 @@ using RVA = System.UInt32;
 
 namespace Mono.Cecil {
 
-	public sealed class MethodDefinition : MethodReference, IMemberDefinition, ISecurityDeclarationProvider {
+	public sealed class MethodDefinition : MethodReference, IMemberDefinition, ISecurityDeclarationProvider, ICustomDebugInformationProvider {
 
 		ushort attributes;
 		ushort impl_attributes;
@@ -30,13 +30,15 @@ namespace Mono.Cecil {
 		Collection<MethodReference> overrides;
 
 		internal MethodBody body;
+		internal MethodDebugInformation debug_info;
+		internal Collection<CustomDebugInformation> custom_infos;
 
-		public override string Name
-		{
+		public override string Name {
 			get { return base.Name; }
 			set {
 				if (IsWindowsRuntimeProjection && value != base.Name)
-					throw new InvalidOperationException ("Projected method name can't be changed.");
+					throw new InvalidOperationException ();
+
 				base.Name = value;
 			}
 		}
@@ -45,7 +47,8 @@ namespace Mono.Cecil {
 			get { return (MethodAttributes) attributes; }
 			set {
 				if (IsWindowsRuntimeProjection && (ushort) value != attributes)
-					throw new InvalidOperationException ("Projected method attributes can't be changed.");
+					throw new InvalidOperationException ();
+
 				attributes = (ushort) value;
 			}
 		}
@@ -54,7 +57,8 @@ namespace Mono.Cecil {
 			get { return (MethodImplAttributes) impl_attributes; }
 			set {
 				if (IsWindowsRuntimeProjection && (ushort) value != impl_attributes)
-					throw new InvalidOperationException ("Projected method implementation attributes can't be changed.");
+					throw new InvalidOperationException ();
+
 				impl_attributes = (ushort) value;
 			}
 		}
@@ -165,6 +169,17 @@ namespace Mono.Cecil {
 			}
 		}
 
+		public MethodDebugInformation DebugInformation {
+			get {
+				if (debug_info != null)
+					return debug_info;
+
+				Mixin.Read (Body);
+
+				return debug_info ?? (debug_info = new MethodDebugInformation (this));
+			}
+		}
+
 		public bool HasPInvokeInfo {
 			get {
 				if (pinvoke != null)
@@ -222,6 +237,22 @@ namespace Mono.Cecil {
 
 		public override Collection<GenericParameter> GenericParameters {
 			get { return generic_parameters ?? (this.GetGenericParameters (ref generic_parameters, Module)); }
+		}
+
+		public bool HasCustomDebugInformations {
+			get {
+				Mixin.Read (Body);
+
+				return !custom_infos.IsNullOrEmpty ();
+			}
+		}
+
+		public Collection<CustomDebugInformation> CustomDebugInformations {
+			get {
+				Mixin.Read (Body);
+
+				return custom_infos ?? (custom_infos = new Collection<CustomDebugInformation> ());
+			}
 		}
 
 		#region MethodAttributes

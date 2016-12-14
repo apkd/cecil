@@ -1,9 +1,13 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using Microsoft.Win32;
 
 namespace Mono.Cecil.Tests {
 	public class WindowsRuntimeAssemblyResolver : DefaultAssemblyResolver {
+
+		readonly Dictionary<string, AssemblyDefinition> assemblies = new Dictionary<string, AssemblyDefinition> ();
+
 		public static WindowsRuntimeAssemblyResolver CreateInstance ()
 		{
 			if (Platform.OnMono)
@@ -15,12 +19,21 @@ namespace Mono.Cecil.Tests {
 			}
 		}
 
+		public override AssemblyDefinition Resolve (AssemblyNameReference name)
+		{
+			AssemblyDefinition assembly;
+			if (assemblies.TryGetValue(name.Name, out assembly))
+				return assembly;
+
+			return base.Resolve (name);
+		}
+
 		private WindowsRuntimeAssemblyResolver ()
 		{
 			LoadWindowsSdk ("v8.1", "8.1", (installationFolder) => {
-				var fileName = Path.Combine (installationFolder, @"References\CommonConfiguration\Neutral\Windows.winmd");
+				var fileName = Path.Combine (installationFolder, @"References\CommonConfiguration\Neutral\Annotated\Windows.winmd");
 				var assembly = AssemblyDefinition.ReadAssembly (fileName);
-				RegisterAssembly (assembly);
+				Register (assembly);
 			});
 
 			LoadWindowsSdk ("v10.0", "10", (installationFolder) => {
@@ -29,12 +42,29 @@ namespace Mono.Cecil.Tests {
 
 				foreach (var assemblyPath in assemblies) {
 					var assembly = AssemblyDefinition.ReadAssembly (assemblyPath);
-					RegisterAssembly (assembly);
+					Register (assembly);
 				}
 			});
 		}
 
-		private void LoadWindowsSdk (string registryVersion, string windowsKitsVersion, Action<string> registerAssembliesCallback)
+		void Register (AssemblyDefinition assembly)
+		{
+			assemblies [assembly.Name.Name] = assembly;
+			RegisterAssembly (assembly);
+		}
+
+		protected override void Dispose (bool disposing)
+		{
+			if (!disposing)
+				return;
+
+			foreach (var assembly in assemblies.Values)
+				assembly.Dispose ();
+
+			base.Dispose (true);
+		}
+
+		void LoadWindowsSdk (string registryVersion, string windowsKitsVersion, Action<string> registerAssembliesCallback)
 		{
 #if NET_4_0
 			using (var localMachine32Key = RegistryKey.OpenBaseKey (RegistryHive.LocalMachine, RegistryView.Registry32)) {
