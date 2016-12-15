@@ -12,7 +12,9 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+#if !READ_ONLY
 using System.Diagnostics.SymbolStore;
+#endif
 
 namespace Microsoft.Cci.Pdb {
   internal class PdbFile {
@@ -509,7 +511,14 @@ namespace Microsoft.Cci.Pdb {
 
               string name = (string)names[(int)chk.name];
               int guidStream;
+#if !NET_CORE
               Guid doctypeGuid = SymDocumentType.Text;
+#else
+              // Note : netstandard1.6 doesn't support SymDocumentType.  Looks like it might be in netstandard2.0, but that
+              // is not coming out for a few months still.  Looking at our mono, SymDocumentType.Text simply returns and empty Guid
+              // so let's just go with that
+              Guid doctypeGuid = Guid.Empty;
+#endif
               Guid languageGuid = Guid.Empty;
               Guid vendorGuid = Guid.Empty;
               if (nameIndex.TryGetValue("/SRC/FILES/"+name.ToUpperInvariant(), out guidStream)) {

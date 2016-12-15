@@ -10,7 +10,9 @@
 
 using System;
 using System.Collections.Generic;
+#if !READ_ONLY
 using System.Diagnostics.SymbolStore;
+#endif
 
 using Mono.Cecil.Cil;
 using Mono.Collections.Generic;

@@ -628,7 +628,7 @@ namespace Mono.CompilerServices.SymbolWriter
 		{
 			if (disposing) {
 				if (reader != null) {
-					reader.Close ();
+					((IDisposable)reader).Dispose ();
 					reader = null;
 				}
 			}

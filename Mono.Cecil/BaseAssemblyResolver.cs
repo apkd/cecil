@@ -8,7 +8,7 @@
 // Licensed under the MIT/X11 license.
 //
 
-#if !PCL && !NET_CORE
+#if !PCL
 
 using System;
 using System.Collections.Generic;
@@ -16,6 +16,10 @@ using System.IO;
 using System.Text;
 
 using Mono.Collections.Generic;
+
+#if NET_CORE
+using System.Reflection;
+#endif
 
 namespace Mono.Cecil {
 
@@ -50,12 +54,14 @@ namespace Mono.Cecil {
 			this.reference = reference;
 		}
 
+#if !NET_CORE
 		AssemblyResolutionException (
 			System.Runtime.Serialization.SerializationInfo info,
 			System.Runtime.Serialization.StreamingContext context)
 			: base (info, context)
 		{
 		}
+#endif
 	}
 
 	public abstract class BaseAssemblyResolver : IAssemblyResolver {
@@ -121,7 +127,11 @@ namespace Mono.Cecil {
 				};
 			}
 
+#if !NET_CORE
 			var framework_dir = Path.GetDirectoryName (typeof (object).Module.FullyQualifiedName);
+#else
+			var framework_dir = Path.GetDirectoryName (typeof (object).GetTypeInfo().Module.FullyQualifiedName);
+#endif
 
 			if (IsZero (name.Version)) {
 				assembly = SearchDirectory (name, new [] { framework_dir }, parameters);
@@ -174,14 +184,26 @@ namespace Mono.Cecil {
 		AssemblyDefinition GetCorlib (AssemblyNameReference reference, ReaderParameters parameters)
 		{
 			var version = reference.Version;
+#if !NET_CORE
 			var corlib = typeof (object).Assembly.GetName ();
+#else
+			var corlib = typeof (object).GetTypeInfo().Assembly.GetName ();
+#endif
 
 			if (corlib.Version == version || IsZero (version))
+#if !NET_CORE
 				return GetAssembly (typeof (object).Module.FullyQualifiedName, parameters);
+#else
+				return GetAssembly (typeof (object).GetTypeInfo().Module.FullyQualifiedName, parameters);
+#endif
 
 			var path = Directory.GetParent (
 				Directory.GetParent (
-					typeof (object).Module.FullyQualifiedName).FullName
+#if !NET_CORE
+					typeof(object).Module.FullyQualifiedName).FullName
+#else
+					typeof(object).GetTypeInfo().Module.FullyQualifiedName).FullName
+#endif
 				).FullName;
 
 			if (on_mono) {
@@ -265,7 +287,11 @@ namespace Mono.Cecil {
 		{
 			return Path.Combine (
 				Directory.GetParent (
+#if !NET_CORE
 					Path.GetDirectoryName (typeof (object).Module.FullyQualifiedName)).FullName,
+#else
+					Path.GetDirectoryName (typeof (object).GetTypeInfo().Module.FullyQualifiedName)).FullName,
+#endif
 				"gac");
 		}
 
