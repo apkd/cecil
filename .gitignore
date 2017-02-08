@@ -1,6 +1,7 @@
 bin
 obj
-build
+builds
+builds.zip
 *.suo
 *.iml
 *.user

@@ -1,5 +1,5 @@
 set BASEDIR=%~dp0
-set BUILDDIR=%BASEDIR%build
+set BUILDDIR=%BASEDIR%builds
 set LIBDIR=%BUILDDIR%\lib
 set LIBDIR35=%LIBDIR%\net35
 set LIBDIR40=%LIBDIR%\net40
@@ -29,6 +29,8 @@ call:CleanupBuild %LIBDIR35%
 ::Build Cecil for .NET 4.0
 %MSBUILD% "%BASEDIR%\Mono.Cecil.sln" /t:Build /p:Configuration=net_4_0_Release /p:Platform="Any CPU" /p:OutputPath=%LIBDIR40%
 call:CleanupBuild %LIBDIR40%
+
+7z a -tzip -r %BASEDIR%/builds.zip %BUILDDIR%/*
 
 ::--------------------------------------------------
 ::----------------- Functions ----------------------
