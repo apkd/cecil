@@ -204,7 +204,7 @@ namespace Mono.Cecil.Cil {
 
 			directory = new ImageDebugDirectory () {
 				MajorVersion = 256,
-				MinorVersion = 20577,
+				MinorVersion = 20557,
 				Type = 2,
 			};
 
@@ -248,13 +248,20 @@ namespace Mono.Cecil.Cil {
 			if (IsEmbedded)
 				return;
 
+			WritePdbFile ();
+		}
+
+		void WritePdbFile ()
+		{
 			WritePdbHeap ();
+
 			WriteTableHeap ();
 
 			writer.BuildMetadataTextMap ();
 			writer.WriteMetadataHeader ();
 			writer.WriteMetadata ();
 
+			writer.Flush ();
 			writer.stream.Dispose ();
 		}
 
@@ -290,6 +297,10 @@ namespace Mono.Cecil.Cil {
 
 		void WriteTableHeap ()
 		{
+			if (module_metadata.string_heap != pdb_metadata.string_heap) {
+				pdb_metadata.table_heap.string_offsets = pdb_metadata.string_heap.WriteStrings ();
+			}
+
 			pdb_metadata.table_heap.WriteTableHeap ();
 		}
 	}

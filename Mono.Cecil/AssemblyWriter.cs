@@ -93,7 +93,7 @@ namespace Mono.Cecil {
 			var symbol_writer_provider = parameters.SymbolWriterProvider;
 #if !PCL && !NET_CORE
 			if (symbol_writer_provider == null && parameters.WriteSymbols)
-				symbol_writer_provider = SymbolProvider.GetPlatformWriterProvider ();
+				symbol_writer_provider = new DefaultSymbolWriterProvider ();
 #endif
 			var symbol_writer = GetSymbolWriter (module, fq_name, symbol_writer_provider, parameters);
 
@@ -1007,6 +1007,7 @@ namespace Mono.Cecil {
 		{
 			BuildModule ();
 
+			table_heap.string_offsets = string_heap.WriteStrings ();
 			table_heap.WriteTableHeap ();
 		}
 
@@ -1265,7 +1266,7 @@ namespace Mono.Cecil {
 				return;
 
 			AttachTokens ();
-			AddTypeDefs ();
+			AddTypes ();
 			AddGenericParameters ();
 		}
 
@@ -1274,10 +1275,10 @@ namespace Mono.Cecil {
 			var types = module.Types;
 
 			for (int i = 0; i < types.Count; i++)
-				AttachTypeDefToken (types [i]);
+				AttachTypeToken (types [i]);
 		}
 
-		void AttachTypeDefToken (TypeDefinition type)
+		void AttachTypeToken (TypeDefinition type)
 		{
 			var treatment = WindowsRuntimeProjections.RemoveProjection(type);
 
@@ -1286,25 +1287,25 @@ namespace Mono.Cecil {
 			type.methods_range.Start = method_rid;
 
 			if (type.HasFields)
-				AttachFieldsDefToken (type);
+				AttachFieldsToken (type);
 
 			if (type.HasMethods)
-				AttachMethodsDefToken (type);
+				AttachMethodsToken (type);
 
 			if (type.HasNestedTypes)
-				AttachNestedTypesDefToken (type);
+				AttachNestedTypesToken (type);
 
 			WindowsRuntimeProjections.ApplyProjection(type, treatment);
 		}
 
-		void AttachNestedTypesDefToken (TypeDefinition type)
+		void AttachNestedTypesToken (TypeDefinition type)
 		{
 			var nested_types = type.NestedTypes;
 			for (int i = 0; i < nested_types.Count; i++)
-				AttachTypeDefToken (nested_types [i]);
+				AttachTypeToken (nested_types [i]);
 		}
 
-		void AttachFieldsDefToken (TypeDefinition type)
+		void AttachFieldsToken (TypeDefinition type)
 		{
 			var fields = type.Fields;
 			type.fields_range.Length = (uint) fields.Count;
@@ -1312,7 +1313,7 @@ namespace Mono.Cecil {
 				fields [i].token = new MetadataToken (TokenType.Field, field_rid++);
 		}
 
-		void AttachMethodsDefToken (TypeDefinition type)
+		void AttachMethodsToken (TypeDefinition type)
 		{
 			var methods = type.Methods;
 			type.methods_range.Length = (uint) methods.Count;
@@ -1411,7 +1412,7 @@ namespace Mono.Cecil {
 			return token;
 		}
 
-		void AddTypeDefs ()
+		void AddTypes ()
 		{
 			var types = module.Types;
 
@@ -2507,10 +2508,13 @@ namespace Mono.Cecil {
 			}
 
 			signature.WriteByte ((byte) separator);
-
-			var parts = name.Split (new [] { separator }, StringSplitOptions.RemoveEmptyEntries);
-			for (int i = 0; i < parts.Length; i++)
-				signature.WriteCompressedUInt32 (GetUTF8StringBlobIndex (parts [i]));
+			var parts = name.Split (new [] { separator });
+			for (int i = 0; i < parts.Length; i++) {
+				if (parts [i] == String.Empty)
+					signature.WriteCompressedUInt32 (0);
+				else
+					signature.WriteCompressedUInt32 (GetUTF8StringBlobIndex (parts [i]));
+			}
 
 			return signature;
 		}
@@ -3207,7 +3211,7 @@ namespace Mono.Cecil {
 
 #endif
 
-			static partial class Mixin {
+	static partial class Mixin {
 
 		public static bool TryGetUniqueDocument (this MethodDebugInformation info, out Document document)
 		{
