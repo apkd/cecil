@@ -1049,7 +1049,13 @@ namespace Mono.Cecil {
 			if (type != null)
 				return type;
 
-			return ReadTypeDefinition (rid);
+			type = ReadTypeDefinition (rid);
+
+			if (module.IsWindowsMetadata()) {
+				WindowsRuntimeProjections.Project (type);
+			}
+
+			return type;
 		}
 
 		TypeDefinition ReadTypeDefinition (uint rid)
