@@ -111,6 +111,10 @@ namespace Mono.Cecil {
 		public ReaderParameters (ReadingMode readingMode)
 		{
 			this.reading_mode = readingMode;
+            // UNITY -- we need to default to in_memory = True, because
+            // a lot of code assumes they it overwrite the source module file.
+            // This default can still be overridden.
+            this.in_memory = true;
 		}
 	}
 
