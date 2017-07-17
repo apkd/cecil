@@ -9,12 +9,13 @@
 //
 //-----------------------------------------------------------------------------
 using System;
-using System.Collections;
+
 using System.Collections.Generic;
 using System.IO;
 #if !READ_ONLY
 using System.Diagnostics.SymbolStore;
 #endif
+using Mono.Cecil.Cil;
 
 namespace Microsoft.Cci.Pdb {
   internal class PdbFile {
@@ -256,7 +257,7 @@ namespace Microsoft.Cci.Pdb {
     static void LoadFuncsFromDbiModule(BitAccess bits,
                                        DbiModuleInfo info,
                                        IntHashTable names,
-                                       ArrayList funcList,
+                                       List<PdbFunction> funcList,
                                        bool readStrings,
                                        MsfDirectory dir,
                                        Dictionary<string, int> nameIndex,
@@ -299,7 +300,7 @@ namespace Microsoft.Cci.Pdb {
       //}
 
       // Read gpmod section.
-      ArrayList modList = new ArrayList();
+      List<DbiModuleInfo> modList = new List<DbiModuleInfo>();
       int end = bits.Position + dh.gpmodiSize;
       while (bits.Position < end) {
         DbiModuleInfo mod = new DbiModuleInfo(bits, readStrings);
@@ -311,7 +312,7 @@ namespace Microsoft.Cci.Pdb {
       }
 
       if (modList.Count > 0) {
-        modules = (DbiModuleInfo[])modList.ToArray(typeof(DbiModuleInfo));
+        modules = modList.ToArray();
       } else {
         modules = null;
       }
@@ -370,7 +371,7 @@ namespace Microsoft.Cci.Pdb {
       dir.streams[3].Read(reader, bits);
       LoadDbiStream(bits, out modules, out header, true);
 
-      ArrayList funcList = new ArrayList();
+      List<PdbFunction> funcList = new List<PdbFunction>();
 
       if (modules != null) {
         for (int m = 0; m < modules.Length; m++) {
@@ -386,7 +387,7 @@ namespace Microsoft.Cci.Pdb {
         }
       }
 
-      PdbFunction[] funcs = (PdbFunction[])funcList.ToArray(typeof(PdbFunction));
+      PdbFunction[] funcs = funcList.ToArray();
 
       // After reading the functions, apply the token remapping table if it exists.
       if (header.snTokenRidMap != 0 && header.snTokenRidMap != 0xffff) {
@@ -512,7 +513,7 @@ namespace Microsoft.Cci.Pdb {
               string name = (string)names[(int)chk.name];
               int guidStream;
 #if !NET_CORE
-              Guid doctypeGuid = SymDocumentType.Text;
+              Guid doctypeGuid = DocumentType.Text.ToGuid ();
 #else
               // Note : netstandard1.6 doesn't support SymDocumentType.  Looks like it might be in netstandard2.0, but that
               // is not coming out for a few months still.  Looking at our mono, SymDocumentType.Text simply returns and empty Guid
