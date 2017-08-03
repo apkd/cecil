@@ -809,6 +809,26 @@ namespace Mono.Cecil.Cil {
 			return null;
 		}
 
+		public static SymbolReaderKind GetSymbolReaderKind(string fileName)
+		{
+			try
+			{
+				using (var assemblyDefinition = AssemblyDefinition.ReadAssembly(fileName))
+				{
+					if (assemblyDefinition.Modules.Count <= 0)
+						return SymbolReaderKind.None;
+
+					var module = assemblyDefinition.Modules[0];
+					var provider = new DefaultSymbolReaderProvider();
+					return provider.GetSymbolReaderKind(module, fileName);
+				}
+			}
+			catch (Exception)
+			{
+				return SymbolReaderKind.None;
+			}
+		}
+
 		public SymbolReaderKind GetSymbolReaderKind (ModuleDefinition module, string fileName)
 		{
 			if (module.Image.HasDebugTables ())
