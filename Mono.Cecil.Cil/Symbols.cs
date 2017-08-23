@@ -748,6 +748,13 @@ namespace Mono.Cecil.Cil {
 		ISymbolReader GetSymbolReader (ModuleDefinition module, Stream symbolStream);
 	}
 
+	public enum SymbolReaderKind {
+		NativePdb,
+		PortablePdb,
+		Mdb,
+		None
+	}
+
 	public class DefaultSymbolReaderProvider : ISymbolReaderProvider {
 
 		readonly bool throw_if_no_symbol;
@@ -800,6 +807,45 @@ namespace Mono.Cecil.Cil {
 				throw new FileNotFoundException (string.Format ("No symbol found for file: {0}", fileName));
 
 			return null;
+		}
+
+		public static SymbolReaderKind GetSymbolReaderKind(string fileName)
+		{
+			try
+			{
+				using (var assemblyDefinition = AssemblyDefinition.ReadAssembly(fileName))
+				{
+					if (assemblyDefinition.Modules.Count <= 0)
+						return SymbolReaderKind.None;
+
+					var module = assemblyDefinition.Modules[0];
+					var provider = new DefaultSymbolReaderProvider();
+					return provider.GetSymbolReaderKind(module, fileName);
+				}
+			}
+			catch (Exception)
+			{
+				return SymbolReaderKind.None;
+			}
+		}
+
+		public SymbolReaderKind GetSymbolReaderKind (ModuleDefinition module, string fileName)
+		{
+			if (module.Image.HasDebugTables ())
+				return SymbolReaderKind.None;
+
+			var pdb_file_name = Mixin.GetPdbFileName (fileName);
+
+			if (File.Exists (pdb_file_name))
+				return Mixin.IsPortablePdb (Mixin.GetPdbFileName (fileName))
+					? SymbolReaderKind.PortablePdb
+					: SymbolReaderKind.NativePdb;
+
+			var mdb_file_name = Mixin.GetMdbFileName (fileName);
+			if (File.Exists (mdb_file_name))
+				return SymbolReaderKind.Mdb;
+
+			return SymbolReaderKind.None;
 		}
 
 		public ISymbolReader GetSymbolReader (ModuleDefinition module, Stream symbolStream)
