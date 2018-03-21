@@ -23,7 +23,7 @@ using Mono.Collections.Generic;
 namespace System.Diagnostics.SymbolStore
 {
 	// Add back some stuff that is missing in netstandard1.6
-	[Serializable]
+	//[Serializable]
 	public enum SymAddressKind {
 		ILOffset = 1,
 		NativeRVA = 2,
