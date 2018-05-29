@@ -69,7 +69,6 @@ namespace Mono.Cecil {
 #endif
 	}
 
-#if !NET_CORE
 	public abstract class BaseAssemblyResolver : IAssemblyResolver {
 
 		static readonly bool on_mono = Type.GetType ("Mono.Runtime") != null;
@@ -376,5 +375,4 @@ namespace Mono.Cecil {
 		{
 		}
 	}
-#endif
 }
