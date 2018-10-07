@@ -21,15 +21,15 @@ namespace Mono.Cecil.Tests {
 			TestCSharp ("CustomAttributes.cs", module => {
 				var hamster = module.GetType ("Hamster");
 
-			    Assert.IsTrue (hamster.HasCustomAttributes);
-			    Assert.AreEqual (1, hamster.CustomAttributes.Count);
+				Assert.IsTrue (hamster.HasCustomAttributes);
+				Assert.AreEqual (1, hamster.CustomAttributes.Count);
 
-			    var attribute = hamster.CustomAttributes [0];
-			    Assert.AreEqual ("System.Void FooAttribute::.ctor(System.String)",
-				    attribute.Constructor.FullName);
+				var attribute = hamster.CustomAttributes [0];
+				Assert.AreEqual ("System.Void FooAttribute::.ctor(System.String)",
+					attribute.Constructor.FullName);
 
-			    Assert.IsTrue (attribute.HasConstructorArguments);
-			    Assert.AreEqual (1, attribute.ConstructorArguments.Count);
+				Assert.IsTrue (attribute.HasConstructorArguments);
+				Assert.AreEqual (1, attribute.ConstructorArguments.Count);
 
 				AssertArgument ("bar", attribute.ConstructorArguments [0]);
 			});
@@ -449,6 +449,21 @@ namespace Mono.Cecil.Tests {
 			});
 		}
 
+		[Test]
+		public void NullCharInString ()
+		{
+			TestCSharp ("CustomAttributes.cs", module => {
+				var type = module.GetType ("NullCharInString");
+				var attributes = type.CustomAttributes;
+				Assert.AreEqual (1, attributes.Count);
+				var attribute = attributes [0];
+				Assert.AreEqual (1, attribute.ConstructorArguments.Count);
+				var value = (string) attribute.ConstructorArguments [0].Value;
+				Assert.AreEqual (8, value.Length);
+				Assert.AreEqual ('\0', value [7]);
+			});
+		}
+
 #if !READ_ONLY
 		[Test]
 		public void DefineCustomAttributeFromBlob ()
@@ -559,10 +574,10 @@ namespace Mono.Cecil.Tests {
 			}
 
 			switch (Type.GetTypeCode (value.GetType ())) {
-			case TypeCode.String:
+			case System.TypeCode.String:
 				signature.AppendFormat ("\"{0}\"", value);
 				break;
-			case TypeCode.Char:
+			case System.TypeCode.Char:
 				signature.AppendFormat ("'{0}'", (char) value);
 				break;
 			default:

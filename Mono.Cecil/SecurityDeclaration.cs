@@ -71,6 +71,14 @@ namespace Mono.Cecil {
 		{
 			this.attribute_type = attributeType;
 		}
+
+		bool ICustomAttribute.HasConstructorArguments {
+			get { return false; }
+		}
+
+		Collection<CustomAttributeArgument> ICustomAttribute.ConstructorArguments {
+			get { throw new NotSupportedException (); }
+		}
 	}
 
 	public sealed class SecurityDeclaration {
@@ -144,11 +152,7 @@ namespace Mono.Cecil {
 			if (resolved || !HasImage)
 				return;
 
-			module.Read (this, (declaration, reader) => {
-				reader.ReadSecurityDeclarationSignature (declaration);
-				return this;
-			});
-
+			module.Read (this, (declaration, reader) => reader.ReadSecurityDeclarationSignature (declaration));
 			resolved = true;
 		}
 	}
