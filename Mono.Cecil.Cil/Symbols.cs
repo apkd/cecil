@@ -988,6 +988,7 @@ namespace Mono.Cecil.Cil {
 			var name = new SR.AssemblyName {
 				Name = cecil_name.Name + "." + suffix,
 				Version = cecil_name.Version,
+				CultureInfo = cecil_name.CultureInfo,
 			};
 
 			name.SetPublicKeyToken (cecil_name.GetPublicKeyToken ());
